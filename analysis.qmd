@@ -1,0 +1,68 @@
+---
+title: "Exploring Storms"
+author: "Your Name"
+execute:
+  echo: false
+---
+
+```{r}
+#| label: setup
+#| message: false
+
+library(tidyverse)
+```
+
+```{r}
+#| label: storms-per-year
+
+storms |>
+  filter(status %in% c("tropical depression", "tropical storm", "hurricane")) |>
+  mutate(
+    status = factor(
+      status,
+      levels = c("tropical depression", "tropical storm", "hurricane")
+    )
+  ) |>
+  distinct(year, name, status) |>
+  count(year, status) |>
+  complete(year, status, fill = list(n = 0)) |>
+  ggplot(aes(x = year, y = n, fill = status)) +
+  geom_area() +
+  scale_fill_manual(
+    values = c(
+      "tropical depression" = "lightblue",
+      "tropical storm" = "orange",
+      "hurricane" = "darkred"
+    )
+  ) +
+  labs(
+    title = "Number of Storms per Year by Type",
+    x = "Year",
+    y = "Number of Storms",
+    fill = "Storm Type"
+  )
+```
+
+```{r}
+#| label: print-storms
+#| cache: true
+
+storms_recent <- storms |>
+  filter(year >= 2000) |>
+  select(year, name, status, wind, pressure)
+```
+
+```{r}
+#| label: wind-pressure-plot
+
+storms_recent |>
+  ggplot(aes(x = wind, y = pressure, color = status)) +
+  geom_point(alpha = 0.4) +
+  labs(
+    title = "Storm Pressure Decreases as Wind Speed Increases",
+    subtitle = "Atlantic storm observations from 2000 to present, colored by storm status",
+    x = "Wind Speed (knots)",
+    y = "Air Pressure (millibars)",
+    color = "Storm Status"
+  )
+```
